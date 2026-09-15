@@ -33,8 +33,8 @@ and South Africa. Contributions reach us through **GitHub**, **Drips Wave** and
 ## 2. Finding and claiming an issue
 
 Issues open to contributors carry a complexity label (`trivial`, `medium` or
-`high`) and an area label: `adapter`, `ui`, `backend`, `contracts`, `docs` or
-`conformance`. `good-first-issue` marks a gentle entry point. Issues in a Drips
+`high`) and an area label: `adapter`, `core`, `ui`, `backend`, `contracts`, `docs`
+or `conformance`. `good first issue` marks a gentle entry point. Issues in a Drips
 Wave also carry the program label the Drips bot applies, such as `Stellar Wave`.
 
 **Via Drips Wave**
