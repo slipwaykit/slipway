@@ -51,6 +51,19 @@ export interface AnchorView {
 }
 
 /**
+ * The body of `GET /api/anchors`.
+ *
+ * @example
+ * ```ts
+ * const { anchors }: AnchorsResponse = await (await fetch(url)).json();
+ * ```
+ */
+export interface AnchorsResponse {
+  /** Every seeded anchor, usable or not. */
+  readonly anchors: readonly AnchorView[];
+}
+
+/**
  * Build the anchors route.
  *
  * @param deps - Database and registry.
@@ -95,7 +108,8 @@ export function createAnchorsRoute(deps: AppDeps): Hono {
       };
     });
 
-    return context.json({ anchors: views });
+    const body: AnchorsResponse = { anchors: views };
+    return context.json(body);
   });
 
   return app;

@@ -70,6 +70,26 @@ export interface QuoteErrorView {
 }
 
 /**
+ * The body of `GET /api/quotes`.
+ *
+ * @example
+ * ```ts
+ * const body: QuotesResponse = await (await fetch(url)).json();
+ * const best = body.quotes[0];   // largest landedAmount
+ * ```
+ */
+export interface QuotesResponse {
+  /** The request as the API understood it, amount still a string. */
+  readonly request: QuoteRequest;
+  /** Successful quotes, best landed amount first. */
+  readonly quotes: readonly QuoteView[];
+  /** Adapters that were asked and did not produce a quote. */
+  readonly errors: readonly QuoteErrorView[];
+  /** When the comparison ran, Unix epoch milliseconds. */
+  readonly queriedAt: number;
+}
+
+/**
  * Build the quotes route.
  *
  * @param deps - Registry and configuration.
@@ -149,12 +169,13 @@ export function createQuotesRoute(deps: AppDeps): Hono {
 
     // 200 even when every adapter failed. The caller asked "what can I get on
     // this corridor", and "nothing, and here is why from each" is an answer.
-    return context.json({
+    const body: QuotesResponse = {
       request,
       quotes: quoteViews,
       errors: errorViews,
       queriedAt: Date.now(),
-    });
+    };
+    return context.json(body);
   });
 
   return app;

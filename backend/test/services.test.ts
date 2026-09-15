@@ -343,6 +343,8 @@ describe('runPoll', () => {
     ).json();
 
     expect(body.history).toHaveLength(3);
+    // Names come from the registry, so the chart matches the comparison page.
+    expect(body.history.map((row: { adapterName: string }) => row.adapterName)).toContain('Demo NGN Ramp 1');
     expect(body.history.some((row: { errorCode: string | null }) => row.errorCode !== null)).toBe(true);
     expect(body.history[0].attestations[0]).toMatchObject({ txHash: 'abc123' });
   });

@@ -23,6 +23,8 @@ export interface SnapshotView {
   readonly id: number;
   /** Which adapter answered. */
   readonly adapterId: string;
+  /** Its display name now, or its id if it is no longer registered. */
+  readonly adapterName: string;
   /** Notional sold. */
   readonly sellAmount: string;
   /** Gross bought, null on failure. */
@@ -41,6 +43,54 @@ export interface SnapshotView {
   readonly createdAt: number;
   /** On-chain records of this snapshot. */
   readonly attestations: readonly { txHash: string; ledger: number | null }[];
+}
+
+/** One corridor, as the API renders it. */
+export interface CorridorView {
+  /** `{country}-{fiat}-{assetCode}-{direction}`. */
+  readonly id: string;
+  /** ISO 3166-1 alpha-2. */
+  readonly country: string;
+  /** ISO 4217. */
+  readonly fiat: string;
+  /** Stellar asset code. */
+  readonly assetCode: string;
+  /** Issuing account, or null. */
+  readonly assetIssuer: string | null;
+  /** `deposit` or `withdraw`. */
+  readonly direction: string;
+}
+
+/**
+ * The body of `GET /api/corridors`.
+ *
+ * @example
+ * ```ts
+ * const { corridors }: CorridorsResponse = await (await fetch(url)).json();
+ * ```
+ */
+export interface CorridorsResponse {
+  /** Every corridor, with the payment method the poller uses on it. */
+  readonly corridors: readonly (CorridorView & { readonly pollMethod: string | null })[];
+}
+
+/**
+ * The body of `GET /api/corridors/:id/history`.
+ *
+ * @example
+ * ```ts
+ * const { history }: HistoryResponse = await (await fetch(url)).json();
+ * ```
+ */
+export interface HistoryResponse {
+  /** The corridor asked about. */
+  readonly corridor: CorridorView;
+  /** Window size in days. */
+  readonly days: number;
+  /** Start of the window, Unix epoch milliseconds. */
+  readonly since: number;
+  /** Snapshots oldest first, failures included. */
+  readonly history: readonly SnapshotView[];
 }
 
 /**
@@ -63,7 +113,7 @@ export function createCorridorsRoute(deps: AppDeps): Hono {
     const rows = await deps.db.select().from(corridors);
     const methods = new Map(SEED_CORRIDORS.map((seed) => [seed.id, seed.pollMethod]));
 
-    return context.json({
+    const body: CorridorsResponse = {
       corridors: rows.map((row) => ({
         id: row.id,
         country: row.country,
@@ -73,7 +123,8 @@ export function createCorridorsRoute(deps: AppDeps): Hono {
         direction: row.direction,
         pollMethod: methods.get(row.id) ?? null,
       })),
-    });
+    };
+    return context.json(body);
   });
 
   app.get('/corridors/:id/history', async (context) => {
@@ -122,6 +173,7 @@ export function createCorridorsRoute(deps: AppDeps): Hono {
     const history: SnapshotView[] = rows.map((row) => ({
       id: row.id,
       adapterId: row.adapterId,
+      adapterName: deps.registry.get(row.adapterId)?.name ?? row.adapterId,
       sellAmount: row.sellAmount,
       buyAmount: row.buyAmount,
       landedAmount: row.landedAmount,
@@ -133,7 +185,7 @@ export function createCorridorsRoute(deps: AppDeps): Hono {
       attestations: bySnapshot.get(row.id) ?? [],
     }));
 
-    return context.json({
+    const body: HistoryResponse = {
       corridor: {
         id: corridor.id,
         country: corridor.country,
@@ -145,7 +197,8 @@ export function createCorridorsRoute(deps: AppDeps): Hono {
       days: parsed.data.days,
       since,
       history,
-    });
+    };
+    return context.json(body);
   });
 
   return app;
