@@ -1,0 +1,31 @@
+{
+  "name": "slipway",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A TypeScript adapter kit for adding fiat on and off ramps to Stellar applications.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slipwaykit/slipway.git"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@12.4.1",
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' build",
+    "test": "vitest run",
+    "typecheck": "tsc --build --force",
+    "lint": "eslint .",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/node": "^20.16.0",
+    "eslint": "^9.12.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.8.0",
+    "vitest": "^2.1.0"
+  }
+}

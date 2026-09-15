@@ -1,0 +1,23 @@
+{
+  "name": "@slipwaykit/adapter-mock",
+  "version": "0.1.0",
+  "description": "A deterministic in-memory Slipway adapter for demos, tests and conformance runs.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@slipwaykit/core": "workspace:*"
+  }
+}

@@ -1,0 +1,11 @@
+packages:
+  - 'packages/*'
+  - 'packages/adapters/*'
+  - 'backend'
+  - 'frontend'
+
+# esbuild (via vitest) and better-sqlite3 (backend) fetch or compile a native
+# binary in a postinstall step. Both are required for the toolchain to work.
+allowBuilds:
+  esbuild: true
+  better-sqlite3: true

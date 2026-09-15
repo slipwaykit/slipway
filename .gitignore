@@ -1,0 +1,26 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Rust
+target/
+
+# Env
+.env
+.env.local
+*.local
+
+# Next.js
+.next/
+out/
+
+# SQLite
+*.db
+*.db-journal
+*.sqlite
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
