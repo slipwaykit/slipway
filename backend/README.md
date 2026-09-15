@@ -56,6 +56,18 @@ stop the rest.
 Successful snapshots are handed to the attestor. If that fails, it is logged and
 the run continues; attestation is best effort and never blocks a quote.
 
+## Attestation
+
+Set `SLIPWAY_ATTESTOR_SECRET` and `SLIPWAY_ATTESTATIONS_CONTRACT` and each
+successful snapshot is written to the [attestations contract](../contracts/attestations)
+on testnet. Verified end to end on 2026-09-15: one poll of the Kenyan corridor
+produced two snapshots, two on-chain attestations, and two rows in the
+`attestations` table carrying their ledger numbers.
+
+A row with a `tx_hash` but no `ledger` means the transaction was sent but its
+outcome could not be read back. That is recorded rather than dropped, because
+the entry may well exist on chain.
+
 ## Anchor health
 
 `lastError` records only codes that mean the anchor could not be **reached** —

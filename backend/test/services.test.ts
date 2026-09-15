@@ -488,3 +488,130 @@ describe('anchor health semantics', () => {
     expect(anclap?.lastSeenAt).toBe(NOW);
   });
 });
+
+describe('Attestor submission paths', () => {
+  const CONTRACT = 'CBPHQB7YKLPLM7CZWCWUW6QQOBF77QMOTAHHO3PMP25AW4IXUMMSDFMT';
+  const input = {
+    adapterId: 'mock:ng-0',
+    corridorId: 'NG-NGN-USDC-withdraw',
+    sellAmount: '100',
+    landedAmount: '155604',
+    latencyMs: 3,
+    success: true,
+  };
+
+  async function build(
+    behaviour: {
+      send?: 'PENDING' | 'ERROR';
+      confirm?: 'SUCCESS' | 'FAILED' | 'throws';
+    } = {},
+  ) {
+    const sdk = await import('@stellar/stellar-sdk');
+    const keypair = sdk.Keypair.random();
+    const sent: InstanceType<typeof sdk.Transaction>[] = [];
+    const warnings: unknown[] = [];
+
+    const server = {
+      getAccount: async (address: string) => new sdk.Account(address, '1'),
+      prepareTransaction: async (tx: InstanceType<typeof sdk.Transaction>) => tx,
+      sendTransaction: async (tx: InstanceType<typeof sdk.Transaction>) => {
+        sent.push(tx);
+        return behaviour.send === 'ERROR'
+          ? { status: 'ERROR', hash: 'h', errorResult: 'txBAD' }
+          : { status: 'PENDING', hash: 'cc93fbc7' };
+      },
+      getTransaction: async () => {
+        if (behaviour.confirm === 'throws') throw new Error('Bad union switch: 4');
+        return behaviour.confirm === 'FAILED'
+          ? { status: sdk.rpc.Api.GetTransactionStatus.FAILED }
+          : { status: sdk.rpc.Api.GetTransactionStatus.SUCCESS, ledger: 4_695_269 };
+      },
+    };
+
+    const env = loadEnv({
+      NODE_ENV: 'test',
+      SLIPWAY_ATTESTOR_SECRET: keypair.secret(),
+      SLIPWAY_ATTESTATIONS_CONTRACT: CONTRACT,
+    } as NodeJS.ProcessEnv);
+    const attestor = new Attestor(
+      env,
+      { info: () => {}, warn: (_m, detail) => warnings.push(detail) },
+      { server: server as never, confirmDelayMs: 0 },
+    );
+    return { attestor, sent, warnings, keypair, sdk };
+  }
+
+  it('returns the hash and ledger of a confirmed write', async () => {
+    const { attestor } = await build({ confirm: 'SUCCESS' });
+
+    expect(await attestor.attest(input)).toEqual({ txHash: 'cc93fbc7', ledger: 4_695_269 });
+  });
+
+  it('keeps the hash when the write was sent but its outcome cannot be decoded', async () => {
+    // Regression, seen live on testnet: SDK 13 against a protocol 28 network
+    // sent the transaction successfully, then threw decoding the confirmation.
+    // The entry landed on chain while the attestor reported failure.
+    const { attestor, warnings } = await build({ confirm: 'throws' });
+
+    expect(await attestor.attest(input)).toEqual({ txHash: 'cc93fbc7' });
+    expect(JSON.stringify(warnings)).toContain('Bad union switch');
+  });
+
+  it('records nothing when the network rejects the transaction outright', async () => {
+    const { attestor } = await build({ send: 'ERROR' });
+
+    expect(await attestor.attest(input)).toBeUndefined();
+  });
+
+  it('records nothing when the transaction was included and failed', async () => {
+    const { attestor } = await build({ confirm: 'FAILED' });
+
+    expect(await attestor.attest(input)).toBeUndefined();
+  });
+
+  it('encodes the Attestation struct the contract expects', async () => {
+    const { attestor, sent, keypair, sdk } = await build({ confirm: 'SUCCESS' });
+
+    await attestor.attest(input);
+
+    // SDK 17 exposes XDR as plain tagged objects (its JSON projection is
+    // snake_case, but the properties themselves are camelCase).
+    type ScVal = Parameters<typeof sdk.scValToNative>[0];
+    type XdrText = string | { bytes: Uint8Array };
+    const text = (value: XdrText): string =>
+      typeof value === 'string' ? value : new TextDecoder().decode(value.bytes);
+    const operation = sent[0]!.operations[0] as unknown as {
+      func: { invokeContract: { functionName: XdrText; args: ScVal[] } };
+    };
+    const call = operation.func.invokeContract;
+    const [admin, attestation] = call.args;
+
+    expect(text(call.functionName)).toBe('attest');
+    expect(sdk.scValToNative(admin!)).toBe(keypair.publicKey());
+
+    const entries = (attestation as unknown as { map: { key: { sym: XdrText } }[] }).map;
+    const keys = entries.map((entry) => text(entry.key.sym));
+    // Soroban rejects a struct whose map keys are not in byte order.
+    expect(keys).toEqual([...keys].sort());
+    expect(keys).toEqual([
+      'adapter_id',
+      'corridor',
+      'landed_amount',
+      'latency_ms',
+      'sell_amount',
+      'success',
+      'timestamp',
+    ]);
+
+    const native = sdk.scValToNative(attestation!) as Record<string, unknown>;
+    expect(native).toEqual({
+      adapter_id: 'mock_ng_0',
+      corridor: 'NG_NGN_USDC_withdraw',
+      landed_amount: 1_556_040_000_000n,
+      latency_ms: 3,
+      sell_amount: 1_000_000_000n,
+      success: true,
+      timestamp: 0n,
+    });
+  });
+});

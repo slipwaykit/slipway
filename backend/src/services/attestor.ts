@@ -57,6 +57,12 @@ export interface Logger {
   warn(message: string, detail?: unknown): void;
 }
 
+/** The subset of `rpc.Server` the attestor calls. Injected in tests. */
+export type RpcLike = Pick<
+  rpc.Server,
+  'getAccount' | 'prepareTransaction' | 'sendTransaction' | 'getTransaction'
+>;
+
 const consoleLogger: Logger = {
   info: (message, detail) => console.log(message, detail ?? ''),
   warn: (message, detail) => console.warn(message, detail ?? ''),
@@ -120,21 +126,29 @@ export class Attestor {
 
   readonly #env: Env;
   readonly #logger: Logger;
-  #server: rpc.Server | undefined;
+  #server: RpcLike | undefined;
+  readonly #confirmDelayMs: number;
   #keypair: Keypair | undefined;
 
   /**
    * @param env - Validated configuration. The secret is read here and nowhere else.
    * @param logger - Where to send diagnostics.
+   * @param options - An RPC client and poll delay to inject; tests only.
    *
    * @example
    * ```ts
    * const attestor = new Attestor(loadEnv());
    * ```
    */
-  public constructor(env: Env, logger: Logger = consoleLogger) {
+  public constructor(
+    env: Env,
+    logger: Logger = consoleLogger,
+    options: { readonly server?: RpcLike; readonly confirmDelayMs?: number } = {},
+  ) {
     this.#env = env;
     this.#logger = logger;
+    this.#server = options.server;
+    this.#confirmDelayMs = options.confirmDelayMs ?? 1000;
     this.enabled =
       env.SLIPWAY_ATTESTOR_SECRET !== undefined &&
       env.SLIPWAY_ATTESTATIONS_CONTRACT !== undefined;
@@ -221,8 +235,9 @@ export class Attestor {
         ['success', xdr.ScVal.scvBool(input.success)],
         ['timestamp', nativeToScVal(0n, { type: 'u64' })],
       ]
-        // Soroban requires map keys in sorted order.
-        .sort(([a], [b]) => String(a).localeCompare(String(b)))
+        // Soroban requires map keys in byte order. `localeCompare` is not byte
+        // order: it can reorder punctuation such as `_` by locale.
+        .sort(([a], [b]) => (String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0))
         .map(
           ([key, value]) =>
             new xdr.ScMapEntry({
@@ -255,22 +270,38 @@ export class Attestor {
       throw new Error(`Soroban rejected the transaction: ${JSON.stringify(sent.errorResult)}`);
     }
 
-    const confirmed = await this.#awaitConfirmation(server, sent.hash);
-    if (confirmed === undefined) return { txHash: sent.hash };
-    return { txHash: sent.hash, ledger: confirmed };
+    // From here the transaction exists on the network whether or not we can
+    // read its outcome. Losing the hash would leave an on-chain entry with no
+    // local record of it, so a confirmation failure returns the hash with no
+    // ledger, which the attestations table already reads as "unconfirmed".
+    try {
+      const ledger = await this.#awaitConfirmation(server, sent.hash);
+      return ledger === undefined ? { txHash: sent.hash } : { txHash: sent.hash, ledger };
+    } catch (error) {
+      if (error instanceof LedgerFailure) throw error;
+      this.#logger.warn('[attestor] sent, but could not confirm; recording as unconfirmed', {
+        hash: sent.hash,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      return { txHash: sent.hash };
+    }
   }
 
   /** Poll for inclusion, giving up rather than blocking the poller indefinitely. */
-  async #awaitConfirmation(server: rpc.Server, hash: string): Promise<number | undefined> {
+  async #awaitConfirmation(server: RpcLike, hash: string): Promise<number | undefined> {
     for (let attempt = 0; attempt < 10; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, this.#confirmDelayMs));
       const result = await server.getTransaction(hash);
       if (result.status === rpc.Api.GetTransactionStatus.SUCCESS) return result.ledger;
       if (result.status === rpc.Api.GetTransactionStatus.FAILED) {
-        throw new Error(`Soroban transaction ${hash} failed on ledger.`);
+        // Definitively failed: nothing was written, so there is nothing to record.
+        throw new LedgerFailure(`Soroban transaction ${hash} failed on ledger.`);
       }
     }
     this.#logger.warn('[attestor] transaction not confirmed within 10s', { hash });
     return undefined;
   }
 }
+
+/** A transaction the network included and rejected, as opposed to one we could not read. */
+class LedgerFailure extends Error {}

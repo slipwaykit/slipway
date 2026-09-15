@@ -18,7 +18,7 @@
     "@slipwaykit/adapter-mock": "workspace:*",
     "@slipwaykit/adapter-sep24": "workspace:*",
     "@slipwaykit/core": "workspace:*",
-    "@stellar/stellar-sdk": "^13.0.0",
+    "@stellar/stellar-sdk": "~17.0.1",
     "better-sqlite3": "^11.5.0",
     "drizzle-orm": "^0.36.0",
     "hono": "^4.6.0",
