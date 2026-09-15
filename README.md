@@ -5,9 +5,10 @@ ramps without writing a bespoke integration per provider. African corridors
 first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 > **Status:** core interface, mock and SEP-24 adapters, backend API and poller,
-> and an attestations contract on testnet. No live anchor serving NGN, KES, GHS
-> or ZAR advertises SEP-24 as of 2026-09-15, so those corridors run on labelled
-> mock adapters. Frontend in progress.
+> an attestations contract on testnet, and a frontend that builds and runs
+> against them. Not yet deployed. No live anchor serving NGN, KES, GHS or ZAR
+> advertises SEP-24 as of 2026-09-15, so those corridors run on labelled mock
+> adapters.
 
 ## Packages
 
@@ -17,6 +18,7 @@ first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 | [`packages/adapters/mock`](packages/adapters/mock) | Deterministic offline adapter |
 | [`packages/adapters/sep24`](packages/adapters/sep24) | One adapter for every SEP-24 anchor, driven by home domain |
 | [`backend`](backend) | Hono API, corridor poller, attestor |
+| [`frontend`](frontend) | Next.js demo: comparison, anchors, corridor history |
 | [`contracts/attestations`](contracts/attestations) | Soroban contract recording quote snapshots |
 
 ## Attestations contract (testnet)

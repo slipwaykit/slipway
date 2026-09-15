@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -9,6 +10,7 @@ export default tseslint.config(
       '**/.next/**',
       '**/target/**',
       '**/coverage/**',
+      '**/next-env.d.ts',
     ],
   },
   js.configs.recommended,
@@ -23,5 +25,10 @@ export default tseslint.config(
       ],
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  {
+    files: ['frontend/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
   },
 );

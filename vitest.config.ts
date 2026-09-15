@@ -17,7 +17,7 @@ export default defineConfig({
     // the network during a test is a bug, not a flake.
     environment: 'node',
     setupFiles: ['./test/no-network.setup.ts'],
-    include: ['packages/**/test/**/*.test.ts', 'backend/test/**/*.test.ts'],
+    include: ['packages/**/test/**/*.test.ts', 'backend/test/**/*.test.ts', 'frontend/src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['packages/**/src/**/*.ts', 'backend/src/**/*.ts'],
