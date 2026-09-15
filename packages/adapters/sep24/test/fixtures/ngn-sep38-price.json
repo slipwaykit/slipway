@@ -1,0 +1,13 @@
+{
+  "price": "0.000625",
+  "total_price": "0.0006329113924",
+  "sell_amount": "100",
+  "buy_amount": "158000",
+  "fee": {
+    "total": "2000",
+    "asset": "iso4217:NGN",
+    "details": [
+      { "name": "Payout fee", "description": "Bank transfer to a Nigerian account.", "amount": "2000" }
+    ]
+  }
+}

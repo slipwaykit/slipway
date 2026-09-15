@@ -1,0 +1,15 @@
+{
+  "transaction": {
+    "id": "82fhs729f63dh0v4",
+    "kind": "withdrawal",
+    "status": "pending_stellar",
+    "amount_in": "100",
+    "amount_out": "156000",
+    "amount_fee": "4000",
+    "started_at": "2026-09-15T12:00:00Z",
+    "updated_at": "2026-09-15T12:04:30Z",
+    "stellar_transaction_id": "17a670bc424ff5ce3b386dbfaae9990b66a2a37b4fbe51547e8794962a3f9e6a",
+    "external_transaction_id": "NGN-PAYOUT-99812",
+    "more_info_url": "https://ngn.example.com/sep24/transaction/82fhs729f63dh0v4/more_info"
+  }
+}

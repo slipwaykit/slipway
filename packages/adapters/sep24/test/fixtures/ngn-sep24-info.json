@@ -1,0 +1,33 @@
+{
+  "deposit": {
+    "USDC": {
+      "enabled": true,
+      "min_amount": 5,
+      "max_amount": 50000,
+      "types": {
+        "bank_account": { "fields": {} },
+        "mpesa": { "fields": {} }
+      }
+    }
+  },
+  "withdraw": {
+    "USDC": {
+      "enabled": true,
+      "min_amount": 5,
+      "max_amount": 50000,
+      "fee_percent": 1,
+      "types": {
+        "bank_account": { "fields": {} },
+        "cash_pickup": { "fields": {} },
+        "ussd": { "fields": {} },
+        "carrier_pigeon": { "fields": {} }
+      }
+    },
+    "DEADCOIN": {
+      "enabled": false,
+      "min_amount": 1
+    }
+  },
+  "fee": { "enabled": false },
+  "features": { "account_creation": false, "claimable_balances": false }
+}

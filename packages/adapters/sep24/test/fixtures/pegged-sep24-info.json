@@ -1,0 +1,22 @@
+{
+  "deposit": {
+    "NGNC": { "enabled": true, "min_amount": 100, "fee_fixed": 50 }
+  },
+  "withdraw": {
+    "NGNC": {
+      "enabled": true,
+      "min_amount": 100,
+      "max_amount": 5000000,
+      "fee_fixed": 100,
+      "fee_percent": 0.5,
+      "fee_minimum": 250,
+      "types": { "bank_account": { "fields": {} } }
+    },
+    "USDC": {
+      "enabled": true,
+      "fee_percent": 1,
+      "types": { "bank_account": { "fields": {} } }
+    }
+  },
+  "fee": { "enabled": false }
+}

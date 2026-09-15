@@ -1,0 +1,12 @@
+{
+  "id": "d1ce2f48-3ff1-495d-9240-7a50d806cfed",
+  "status": "NEEDS_INFO",
+  "fields": {
+    "first_name": { "type": "string", "description": "The customer's given name", "optional": false },
+    "bank_account_number": { "type": "string", "description": "10 digit NUBAN account number", "optional": false },
+    "photo_id_front": { "type": "binary", "description": "A photo of the front of your ID", "optional": false },
+    "birth_date": { "type": "date", "description": "Date of birth", "optional": true },
+    "id_type": { "type": "string", "description": "Which document", "choices": ["NIN", "BVN", "passport"], "optional": false },
+    "occupation": { "type": "wobble", "description": "Unknown type, must fall back to string", "optional": true }
+  }
+}

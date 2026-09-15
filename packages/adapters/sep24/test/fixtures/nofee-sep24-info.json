@@ -1,0 +1,10 @@
+{
+  "withdraw": {
+    "NGNC": {
+      "enabled": true,
+      "min_amount": 100,
+      "types": { "bank_account": { "fields": {} } }
+    }
+  },
+  "fee": { "enabled": false }
+}

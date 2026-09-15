@@ -1,0 +1,21 @@
+# SYNTHETIC. An anchor that issues a naira-backed token and runs NO SEP-38
+# quote server, which is the case the /info fee fallback path exists for.
+VERSION = "2.0.0"
+TRANSFER_SERVER_SEP0024 = "https://pegged.example.com/sep24"
+WEB_AUTH_ENDPOINT = "https://pegged.example.com/auth"
+
+[[CURRENCIES]]
+code = "NGNC"
+issuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+status = "live"
+is_asset_anchored = true
+anchor_asset = "NGN"
+
+[[CURRENCIES]]
+code = "USDC"
+issuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+status = "live"
+is_asset_anchored = false
+
+[DOCUMENTATION]
+ORG_NAME = "Example Pegged Anchor"

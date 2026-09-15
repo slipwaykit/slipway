@@ -16,6 +16,7 @@ export default defineConfig({
     // Rule 7: tests pass offline with no credentials. Any adapter that reaches
     // the network during a test is a bug, not a flake.
     environment: 'node',
+    setupFiles: ['./test/no-network.setup.ts'],
     include: ['packages/**/test/**/*.test.ts'],
     coverage: {
       provider: 'v8',

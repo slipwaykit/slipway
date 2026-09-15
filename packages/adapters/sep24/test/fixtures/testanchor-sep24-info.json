@@ -1,0 +1,43 @@
+{
+    "deposit": {
+        "SRT": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        },
+        "native": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        },
+        "USDC": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        }
+    },
+    "withdraw": {
+        "SRT": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        },
+        "native": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        },
+        "USDC": {
+            "enabled": true,
+            "min_amount": 1,
+            "max_amount": 10
+        }
+    },
+    "fee": {
+        "enabled": false
+    },
+    "features": {
+        "account_creation": false,
+        "claimable_balances": false
+    }
+}

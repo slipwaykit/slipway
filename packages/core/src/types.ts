@@ -135,7 +135,14 @@ export interface Capability {
   readonly asset: StellarAsset;
   /** Which way the route runs. */
   readonly direction: Direction;
-  /** Payment methods the provider accepts for this route. May be empty. */
+  /**
+   * Payment methods the provider accepts for this route.
+   *
+   * An empty list means the provider did not constrain the method rather than
+   * that it accepts none: a SEP-24 anchor commonly settles the choice inside
+   * its own hosted flow and publishes nothing here. Matchers treat an empty
+   * list as matching any method.
+   */
   readonly methods: readonly PaymentMethod[];
   /** Smallest amount the provider will accept, in the sell currency. Omitted when undisclosed. */
   readonly minAmount?: Money;

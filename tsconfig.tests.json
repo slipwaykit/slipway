@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@slipwaykit/core": ["./packages/core/src/index.ts"],
+      "@slipwaykit/adapter-mock": ["./packages/adapters/mock/src/index.ts"],
+      "@slipwaykit/adapter-sep24": ["./packages/adapters/sep24/src/index.ts"]
+    }
+  },
+  "include": ["packages/**/test/**/*.ts", "test/**/*.ts", "vitest.config.ts"]
+}

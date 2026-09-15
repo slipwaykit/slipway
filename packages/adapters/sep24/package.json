@@ -1,7 +1,7 @@
 {
-  "name": "@slipwaykit/adapter-mock",
+  "name": "@slipwaykit/adapter-sep24",
   "version": "0.1.0",
-  "description": "A deterministic in-memory Slipway adapter for demos, tests and conformance runs.",
+  "description": "A Slipway adapter for any SEP-24 Stellar anchor, driven entirely by its home domain.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,12 +15,21 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "stellar",
+    "sep-24",
+    "sep-38",
+    "anchor",
+    "fiat",
+    "ramp"
+  ],
   "scripts": {
     "build": "tsc --build",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "test": "vitest run --root=../../.. packages/adapters/mock"
+    "test": "vitest run --root=../../.. packages/adapters/sep24"
   },
   "dependencies": {
-    "@slipwaykit/core": "workspace:*"
+    "@slipwaykit/core": "workspace:*",
+    "smol-toml": "^1.3.0"
   }
 }

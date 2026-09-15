@@ -1,0 +1,21 @@
+# SYNTHETIC. Not a recording of a live anchor.
+# Shaped to match the SEP-1 fields Slipway reads, for an anchor that runs a
+# SEP-38 quote server and a SEP-12 KYC server on a Nigerian corridor.
+VERSION = "2.0.0"
+SIGNING_KEY = "GCHLHDBOKG2JWMJQBTLSL5XG6NO7ESXI2TAQKZXCXWXB5WI2X6W233PR"
+NETWORK_PASSPHRASE = "Public Global Stellar Network ; September 2015"
+
+WEB_AUTH_ENDPOINT = "https://ngn.example.com/auth"
+KYC_SERVER = "https://ngn.example.com/sep12"
+TRANSFER_SERVER_SEP0024 = "https://ngn.example.com/sep24/"
+ANCHOR_QUOTE_SERVER = "https://ngn.example.com/sep38"
+
+[[CURRENCIES]]
+code = "USDC"
+issuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+status = "live"
+is_asset_anchored = false
+
+[DOCUMENTATION]
+ORG_NAME = "Example Naira Anchor"
+ORG_URL = "https://ngn.example.com"

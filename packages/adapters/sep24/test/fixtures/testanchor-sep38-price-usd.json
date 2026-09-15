@@ -1,0 +1,17 @@
+{
+    "price": "1.0500001591",
+    "total_price": "1.0606062213",
+    "sell_amount": "100",
+    "buy_amount": "94.2857",
+    "fee": {
+        "total": "1.00",
+        "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+        "details": [
+            {
+                "name": "Sell fee",
+                "description": "Fee related to selling the asset.",
+                "amount": "1.00"
+            }
+        ]
+    }
+}
