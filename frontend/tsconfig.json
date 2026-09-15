@@ -30,6 +30,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@slipwaykit/core": [
+        "./node_modules/@slipwaykit/core"
       ]
     }
   },

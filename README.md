@@ -25,6 +25,10 @@ first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 [`CBPHQB7YKLPLM7CZWCWUW6QQOBF77QMOTAHHO3PMP25AW4IXUMMSDFMT`](https://stellar.expert/explorer/testnet/contract/CBPHQB7YKLPLM7CZWCWUW6QQOBF77QMOTAHHO3PMP25AW4IXUMMSDFMT)
 
+## Deploying
+
+Backend on Railway, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
+
 ## Development
 
 ```bash
