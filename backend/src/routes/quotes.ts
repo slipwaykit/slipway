@@ -10,6 +10,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { RampError, decimal, type QuoteRequest } from '@slipwaykit/core';
+import type { QuoteErrorView, QuotesResponse, QuoteView } from '../api-types.js';
 import type { AppDeps, ApiErrorBody } from '../deps.js';
 import { isMockAdapter } from '../services/registry.js';
 
@@ -24,70 +25,6 @@ const query = z.object({
   asset: z.string().default('USDC'),
   issuer: z.string().optional(),
 });
-
-/** One adapter's answer, as the API renders it. */
-export interface QuoteView {
-  /** Which adapter answered. */
-  readonly adapterId: string;
-  /** Its display name. */
-  readonly adapterName: string;
-  /** Whether this is an illustrative demo rate rather than a live anchor. */
-  readonly isMock: boolean;
-  /** Amount sold. */
-  readonly sellAmount: string;
-  /** Gross bought, before the fees listed below. */
-  readonly buyAmount: string;
-  /** What the recipient actually receives. Sort on this. */
-  readonly landedAmount: string;
-  /** Headline rate, before fees. */
-  readonly rate: string;
-  /** Every deduction between `buyAmount` and `landedAmount`. */
-  readonly fees: readonly { kind: string; amount: string; currency: string; description?: string }[];
-  /** Unix epoch milliseconds after which this must not be acted on. */
-  readonly expiresAt: number;
-  /** The anchor's own quote id, when it issued one. */
-  readonly providerQuoteId?: string;
-  /** How long the quote took. */
-  readonly latencyMs: number;
-}
-
-/** One adapter's failure, as the API renders it. */
-export interface QuoteErrorView {
-  /** Which adapter failed. */
-  readonly adapterId: string;
-  /** Its display name. */
-  readonly adapterName: string;
-  /** Whether this is a demo adapter. */
-  readonly isMock: boolean;
-  /** A `RampErrorCode`. The UI translates this into plain language. */
-  readonly code: string;
-  /** A developer-facing explanation. */
-  readonly message: string;
-  /** Whether calling again later could plausibly succeed. */
-  readonly retryable: boolean;
-  /** How long it took to fail. */
-  readonly latencyMs: number;
-}
-
-/**
- * The body of `GET /api/quotes`.
- *
- * @example
- * ```ts
- * const body: QuotesResponse = await (await fetch(url)).json();
- * const best = body.quotes[0];   // largest landedAmount
- * ```
- */
-export interface QuotesResponse {
-  /** The request as the API understood it, amount still a string. */
-  readonly request: QuoteRequest;
-  /** Successful quotes, best landed amount first. */
-  readonly quotes: readonly QuoteView[];
-  /** Adapters that were asked and did not produce a quote. */
-  readonly errors: readonly QuoteErrorView[];
-  /** When the comparison ran, Unix epoch milliseconds. */
-  readonly queriedAt: number;
-}
 
 /**
  * Build the quotes route.
@@ -182,3 +119,5 @@ export function createQuotesRoute(deps: AppDeps): Hono {
 }
 
 export { RampError };
+
+export type { QuoteErrorView, QuotesResponse, QuoteView } from '../api-types.js';

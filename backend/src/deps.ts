@@ -23,30 +23,4 @@ export interface AppDeps {
   readonly logger: Logger;
 }
 
-/**
- * The machine-readable body returned for every 4xx and 5xx.
- *
- * Shaped so a client can branch on `error.code` without parsing prose, which is
- * the same contract `RampError` offers inside the library.
- *
- * @example
- * ```ts
- * const body: ApiErrorBody = {
- *   error: {
- *     code: 'INVALID_REQUEST',
- *     message: 'One or more query parameters are invalid.',
- *     issues: [{ path: 'amount', message: 'must be a decimal string' }],
- *   },
- * };
- * ```
- */
-export interface ApiErrorBody {
-  readonly error: {
-    /** A stable, machine-readable code. */
-    readonly code: string;
-    /** A sentence a developer can act on. */
-    readonly message: string;
-    /** Per-field problems, when the failure was validation. */
-    readonly issues?: readonly { path: string; message: string }[];
-  };
-}
+export type { ApiErrorBody } from './api-types.js';

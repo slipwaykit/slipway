@@ -10,88 +10,13 @@ import { Hono } from 'hono';
 import { and, asc, eq, gte } from 'drizzle-orm';
 import { z } from 'zod';
 import { attestations, corridors, snapshots } from '../db/schema.js';
+import type { CorridorsResponse, HistoryResponse, SnapshotView } from '../api-types.js';
 import type { AppDeps, ApiErrorBody } from '../deps.js';
 import { SEED_CORRIDORS } from '../services/anchors.seed.js';
 
 const historyQuery = z.object({
   days: z.coerce.number().int().min(1).max(365).default(7),
 });
-
-/** One recorded quote, or one recorded failure. */
-export interface SnapshotView {
-  /** Row id. */
-  readonly id: number;
-  /** Which adapter answered. */
-  readonly adapterId: string;
-  /** Its display name now, or its id if it is no longer registered. */
-  readonly adapterName: string;
-  /** Notional sold. */
-  readonly sellAmount: string;
-  /** Gross bought, null on failure. */
-  readonly buyAmount: string | null;
-  /** What would have landed, null on failure. */
-  readonly landedAmount: string | null;
-  /** Headline rate, null on failure. */
-  readonly rate: string | null;
-  /** Fee breakdown, null on failure. */
-  readonly fees: unknown;
-  /** `RampErrorCode` when the adapter failed. */
-  readonly errorCode: string | null;
-  /** How long it took, including failures. */
-  readonly latencyMs: number;
-  /** When it was recorded. */
-  readonly createdAt: number;
-  /** On-chain records of this snapshot. */
-  readonly attestations: readonly { txHash: string; ledger: number | null }[];
-}
-
-/** One corridor, as the API renders it. */
-export interface CorridorView {
-  /** `{country}-{fiat}-{assetCode}-{direction}`. */
-  readonly id: string;
-  /** ISO 3166-1 alpha-2. */
-  readonly country: string;
-  /** ISO 4217. */
-  readonly fiat: string;
-  /** Stellar asset code. */
-  readonly assetCode: string;
-  /** Issuing account, or null. */
-  readonly assetIssuer: string | null;
-  /** `deposit` or `withdraw`. */
-  readonly direction: string;
-}
-
-/**
- * The body of `GET /api/corridors`.
- *
- * @example
- * ```ts
- * const { corridors }: CorridorsResponse = await (await fetch(url)).json();
- * ```
- */
-export interface CorridorsResponse {
-  /** Every corridor, with the payment method the poller uses on it. */
-  readonly corridors: readonly (CorridorView & { readonly pollMethod: string | null })[];
-}
-
-/**
- * The body of `GET /api/corridors/:id/history`.
- *
- * @example
- * ```ts
- * const { history }: HistoryResponse = await (await fetch(url)).json();
- * ```
- */
-export interface HistoryResponse {
-  /** The corridor asked about. */
-  readonly corridor: CorridorView;
-  /** Window size in days. */
-  readonly days: number;
-  /** Start of the window, Unix epoch milliseconds. */
-  readonly since: number;
-  /** Snapshots oldest first, failures included. */
-  readonly history: readonly SnapshotView[];
-}
 
 /**
  * Build the corridors route.
@@ -212,3 +137,5 @@ function safeParse(value: string): unknown {
     return value;
   }
 }
+
+export type { CorridorsResponse, CorridorView, HistoryResponse, SnapshotView } from '../api-types.js';

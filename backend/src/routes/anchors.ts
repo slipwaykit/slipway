@@ -9,59 +9,10 @@
 import { Hono } from 'hono';
 import { RampError } from '@slipwaykit/core';
 import { anchors } from '../db/schema.js';
+import type { AnchorsResponse, AnchorView } from '../api-types.js';
 import type { AppDeps } from '../deps.js';
 import { SEED_ANCHORS } from '../services/anchors.seed.js';
 import { homeDomainOf } from '../services/registry.js';
-
-/** One anchor, with its capability summary and health. */
-export interface AnchorView {
-  /** Home domain. */
-  readonly homeDomain: string;
-  /** Display name. */
-  readonly name: string;
-  /** What the domain advertises: `sep24`, `sep6` or `unknown`. */
-  readonly protocol: string;
-  /** Whether Slipway has an adapter that can serve it. */
-  readonly usable: boolean;
-  /** Countries this anchor is understood to serve. */
-  readonly countries: readonly string[];
-  /** Fiat currencies it is understood to serve. */
-  readonly fiats: readonly string[];
-  /** When it last answered, Unix epoch milliseconds, or null. */
-  readonly lastSeenAt: number | null;
-  /** The `RampErrorCode` of its most recent failure, or null. */
-  readonly lastError: string | null;
-  /** Where the entry came from. */
-  readonly source: string;
-  /** `YYYY-MM-DD` the home domain was last verified. */
-  readonly checkedAt: string;
-  /** Any caveat worth showing, such as why it is not usable. */
-  readonly note?: string;
-  /** What its live `/info` advertises, when it could be read. */
-  readonly capabilities?: readonly {
-    direction: string;
-    assetCode: string;
-    methods: readonly string[];
-    minAmount?: string;
-    maxAmount?: string;
-    kycRequired: boolean;
-  }[];
-  /** Why the capability summary is missing, when it is. */
-  readonly capabilityError?: string;
-}
-
-/**
- * The body of `GET /api/anchors`.
- *
- * @example
- * ```ts
- * const { anchors }: AnchorsResponse = await (await fetch(url)).json();
- * ```
- */
-export interface AnchorsResponse {
-  /** Every seeded anchor, usable or not. */
-  readonly anchors: readonly AnchorView[];
-}
 
 /**
  * Build the anchors route.
@@ -156,3 +107,5 @@ async function readCapabilities(deps: AppDeps): Promise<Map<string, CapabilitySu
 
   return summaries;
 }
+
+export type { AnchorsResponse, AnchorView } from '../api-types.js';
