@@ -51,6 +51,8 @@ The adapter computes it one of two ways and refuses rather than guessing:
 2. **`/info` fees** when there is no quote server. `/info` carries no exchange
    rate, so this path only works when the Stellar asset is pegged one-to-one to
    the fiat — the anchor's own fiat-backed token against the fiat backing it.
+   It also refuses when `/info` reports `fee.enabled: true`, because that is the
+   anchor saying its published fee fields are not authoritative.
 
 3. **`QUOTE_INCOMPLETE`** otherwise. USDC against NGN with no quote server has
    no honest answer, and neither does an anchor that published no fee fields at
@@ -98,6 +100,14 @@ second `AbortController` timeout.
   `country` and `fiat` are adapter configuration rather than discovery.
 - **SEP-24 defines no standard browser return URL.** `returnUrl` is sent as
   `return_url` on a best-effort basis; anchors ignore unknown fields.
+- **`stellar.moneygram.com` publishes `fee_fixed: 0` and `fee_percent: 0`
+  alongside `fee.enabled: true`**, then answers `GET /fee` with a 500. Reading
+  those zeros as "free" would hand back the gross amount as the landed amount,
+  so the adapter returns `QUOTE_INCOMPLETE`. Implementing SEP-24 `GET /fee` is
+  the follow-up that would make such anchors quotable — where they serve it.
+- **One anchor often serves several corridors**, and SEP-24 cannot say which. A
+  caller building one adapter per corridor must give each a distinct `id`, or a
+  registry keyed by id will keep only the last one.
 
 ## Tests
 
@@ -105,5 +115,5 @@ second `AbortController` timeout.
 pnpm --filter @slipwaykit/adapter-sep24 test
 ```
 
-181 tests, no network, no credentials. See [`test/fixtures/README.md`](test/fixtures/README.md)
+142 tests, no network, no credentials. See [`test/fixtures/README.md`](test/fixtures/README.md)
 for what was recorded from the live SDF test anchor and what is synthetic.

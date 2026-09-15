@@ -13,5 +13,5 @@
       "@slipwaykit/adapter-sep24": ["./packages/adapters/sep24/src/index.ts"]
     }
   },
-  "include": ["packages/**/test/**/*.ts", "test/**/*.ts", "vitest.config.ts"]
+  "include": ["packages/**/test/**/*.ts", "backend/test/**/*.ts", "test/**/*.ts", "vitest.config.ts"]
 }

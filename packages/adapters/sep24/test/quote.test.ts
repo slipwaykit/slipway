@@ -343,6 +343,45 @@ describe('priceViaInfo', () => {
     ).toThrow(/neither fee_fixed nor fee_percent/);
   });
 
+  it('refuses to price from /info when the anchor says fee.enabled', async () => {
+    // Recorded from stellar.moneygram.com on 2026-09-15: fee_fixed 0 and
+    // fee_percent 0 alongside fee.enabled true, with GET /fee returning a 500.
+    // Reading those zeros as "free" would hand back the gross amount as the
+    // landed amount, which is the exact failure rule 4 exists to prevent.
+    const toml = await tomlFor('pegged-anchor.toml', 'pegged.example.com');
+    const info = parseInfo(json('moneygram-sep24-info.json'));
+
+    expect(info.feeEndpointEnabled).toBe(true);
+    expect(() =>
+      priceViaInfo({
+        asset: info.withdraw.get('USDC')!,
+        toml,
+        fiat: 'USD',
+        feeEndpointEnabled: info.feeEndpointEnabled,
+        sellAmount: '5',
+        buyCurrency: 'USD',
+        now,
+      }),
+    ).toThrow(/fee.enabled/);
+  });
+
+  it('still prices normally when the anchor does not advertise a /fee endpoint', async () => {
+    const toml = await tomlFor('pegged-anchor.toml', 'pegged.example.com');
+    const info = parseInfo(json('pegged-sep24-info.json'));
+
+    const priced = priceViaInfo({
+      asset: info.withdraw.get('NGNC')!,
+      toml,
+      fiat: 'NGN',
+      feeEndpointEnabled: false,
+      sellAmount: '100000',
+      buyCurrency: 'NGN',
+      now,
+    });
+
+    expect(priced.landedAmount).toBe('99400');
+  });
+
   it('accepts an asset whose code equals the fiat code', async () => {
     const toml = await tomlFor('pegged-anchor.toml', 'pegged.example.com');
 

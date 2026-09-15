@@ -93,6 +93,19 @@ export interface Sep24AdapterConfig {
   readonly fetchImpl?: FetchLike;
   /** Clock replacement. Defaults to `Date.now`. */
   readonly now?: () => number;
+  /**
+   * Override the adapter id.
+   *
+   * One anchor commonly serves several corridors, and SEP-24 has no field
+   * saying which, so a caller builds one adapter per corridor. Those adapters
+   * need distinct ids, or a registry keyed by id keeps only the last one.
+   *
+   * @example
+   * ```ts
+   * new Sep24Adapter({ ...config, id: 'sep24:mykobo.co:DE-EUR' });
+   * ```
+   */
+  readonly id?: string;
 }
 
 /** SEP-12 status strings, mapped onto {@link CustomerState}. */
@@ -152,7 +165,7 @@ export class Sep24Adapter implements RampAdapter {
     this.#config = config;
     this.#fetch = config.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.#now = config.now ?? (() => Date.now());
-    this.id = `sep24:${config.homeDomain}`;
+    this.id = config.id ?? `sep24:${config.homeDomain}`;
   }
 
   /**
@@ -293,6 +306,7 @@ export class Sep24Adapter implements RampAdapter {
         asset: assetInfo,
         toml,
         fiat: this.#config.fiat,
+        feeEndpointEnabled: info.feeEndpointEnabled,
         sellAmount: request.amount,
         buyCurrency,
         now: this.#now,

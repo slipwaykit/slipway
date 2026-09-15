@@ -306,6 +306,14 @@ export interface InfoPriceOptions {
   readonly toml: AnchorToml;
   /** The fiat currency configured for this adapter. */
   readonly fiat: string;
+  /**
+   * Whether `/info` advertised `fee.enabled: true`.
+   *
+   * When it did, the anchor is saying its `/info` fee fields are not the whole
+   * story and that `GET /fee` must be consulted. Pricing from `/info` alone in
+   * that case produces a landed amount the anchor never agreed to.
+   */
+  readonly feeEndpointEnabled?: boolean;
   /** Amount being sold, as a decimal string. */
   readonly sellAmount: string;
   /** Display currency for fees. */
@@ -358,6 +366,17 @@ function isPeggedToFiat(asset: AssetInfo, toml: AnchorToml, fiat: string): boole
  */
 export function priceViaInfo(options: InfoPriceOptions): PricedQuote {
   const { asset, toml, fiat, sellAmount, buyCurrency } = options;
+
+  // MoneyGram publishes fee_fixed: 0 and fee_percent: 0 alongside
+  // fee.enabled: true, and then serves a 500 on GET /fee. Reading those zeros
+  // as "this transfer is free" would return the gross amount as the landed
+  // amount, which is precisely what rule 4 exists to prevent.
+  if (options.feeEndpointEnabled === true) {
+    throw new RampError(
+      'QUOTE_INCOMPLETE',
+      `${toml.homeDomain} advertises fee.enabled on /info, meaning its published fee fields are not authoritative and GET /fee must be consulted. Slipway does not implement SEP-24 GET /fee yet, so it cannot compute an honest landed amount here.`,
+    );
+  }
 
   if (!isPeggedToFiat(asset, toml, fiat)) {
     throw new RampError(
