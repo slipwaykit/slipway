@@ -1,0 +1,18 @@
+[package]
+name = "slipway-attestations"
+version = "0.1.0"
+description = "On-chain record of Slipway corridor quote snapshots."
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+crate-type = ["lib", "cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
