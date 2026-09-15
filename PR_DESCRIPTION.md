@@ -126,7 +126,7 @@ cargo test      14 passed   contracts/attestations
 
 - The suite replaces the global `fetch` with a stub that throws, so a test that
   reaches the network fails rather than quietly passing.
-- CI on GitHub: [run 35024222038](https://github.com/slipwaykit/slipway/actions/runs/35024222038), **success**.
+- CI on GitHub: [run 35026486771](https://github.com/slipwaykit/slipway/actions/runs/35026486771), **success**.
 
 ### Stellar testnet (protocol 28)
 
