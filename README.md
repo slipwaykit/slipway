@@ -29,6 +29,10 @@ first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 Backend on Railway, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
 
+## Contributing
+
+Issues are open through Drips Wave and GrantFox. Read [CONTRIBUTING.md](CONTRIBUTING.md) before claiming one.
+
 ## Development
 
 ```bash
