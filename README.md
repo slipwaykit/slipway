@@ -33,7 +33,7 @@ Backend on Render, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
 
 ## Contributing
 
-Issues are open through Drips Wave and GrantFox. Read [CONTRIBUTING.md](CONTRIBUTING.md) before claiming one.
+Issues are open. Read [CONTRIBUTING.md](CONTRIBUTING.md) before claiming one.
 
 ## Development
 
