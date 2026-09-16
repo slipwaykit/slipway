@@ -13,6 +13,7 @@ import { describeEnv } from './env.js';
 import type { AppDeps, ApiErrorBody } from './deps.js';
 import { createAnchorsRoute } from './routes/anchors.js';
 import { createCorridorsRoute } from './routes/corridors.js';
+import { createPollRoute } from './routes/poll.js';
 import { createQuotesRoute } from './routes/quotes.js';
 
 /**
@@ -51,6 +52,8 @@ export function createApp(deps: AppDeps): Hono {
   app.route('/api', createQuotesRoute(deps));
   app.route('/api', createAnchorsRoute(deps));
   app.route('/api', createCorridorsRoute(deps));
+  // Only when a token is configured; see routes/poll.ts.
+  if (deps.env.SLIPWAY_POLL_TOKEN !== undefined) app.route('/api', createPollRoute(deps));
 
   app.notFound((context) => {
     const body: ApiErrorBody = {

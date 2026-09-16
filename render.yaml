@@ -1,0 +1,40 @@
+# Render blueprint for the Slipway backend. The frontend deploys to Vercel.
+#
+# Render's free tier has no persistent disk and sleeps a service after 15
+# minutes of inactivity, so the in-process cron poller is switched off here and
+# driven by .github/workflows/poll.yml instead. That request also wakes the
+# service. See DEPLOY.md for what that costs you.
+
+services:
+  - type: web
+    name: slipway-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Free instances have an ephemeral filesystem: this database is lost on
+      # every restart, redeploy and wake from sleep. Attestations already on
+      # chain survive; the local history does not.
+      - key: SLIPWAY_DB_PATH
+        value: /data/slipway.db
+      # No long-running cron on a service that sleeps. The workflow calls
+      # POST /api/poll instead.
+      - key: SLIPWAY_POLL_ENABLED
+        value: "false"
+      # Render generates this. Copy it into the repository secret
+      # SLIPWAY_POLL_TOKEN so the scheduled workflow can authenticate.
+      - key: SLIPWAY_POLL_TOKEN
+        generateValue: true
+      - key: SLIPWAY_ATTESTATIONS_CONTRACT
+        value: CBPHQB7YKLPLM7CZWCWUW6QQOBF77QMOTAHHO3PMP25AW4IXUMMSDFMT
+      # Set these in the dashboard; never commit them.
+      - key: SLIPWAY_ATTESTOR_SECRET
+        sync: false
+      - key: SLIPWAY_CORS_ORIGINS
+        sync: false

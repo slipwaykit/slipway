@@ -47,6 +47,16 @@ const schema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
 
+  /**
+   * Shared secret for `POST /api/poll`.
+   *
+   * Hosts whose free tier sleeps an idle service (Render, Koyeb) cannot be
+   * relied on to run an in-process cron job. Setting this enables an endpoint a
+   * scheduler can call instead, which both runs the poll and wakes the service.
+   * Leave it unset and the endpoint does not exist at all.
+   */
+  SLIPWAY_POLL_TOKEN: z.string().min(16, 'must be at least 16 characters').optional(),
+
   /** Notional amount the poller quotes on every corridor, in the sell asset. */
   SLIPWAY_POLL_NOTIONAL: z.string().regex(/^\d+(\.\d+)?$/).default('100'),
 });
@@ -117,5 +127,6 @@ export function describeEnv(env: Env): Record<string, unknown> {
     pollEnabled: env.SLIPWAY_POLL_ENABLED,
     pollCron: env.SLIPWAY_POLL_CRON,
     pollNotional: env.SLIPWAY_POLL_NOTIONAL,
+    pollEndpointEnabled: env.SLIPWAY_POLL_TOKEN !== undefined,
   };
 }

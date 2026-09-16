@@ -11,7 +11,7 @@ import { createApp } from './app.js';
 import { createDb } from './db/index.js';
 import { describeEnv, loadEnv } from './env.js';
 import { Attestor } from './services/attestor.js';
-import { seedDatabase, startPoller } from './services/poller.js';
+import { runPoll, seedDatabase, startPoller } from './services/poller.js';
 import { buildRegistry } from './services/registry.js';
 
 const logger = {
@@ -35,10 +35,13 @@ async function main(): Promise<void> {
     logger.info('[attestor] enabled', { account: attestor.publicKey() });
   }
 
-  const app = createApp(deps);
-  const poller = env.SLIPWAY_POLL_ENABLED
-    ? startPoller({ db, registry, attestor, env, logger })
-    : undefined;
+  const pollerDeps = { db, registry, attestor, env, logger };
+  const app = createApp({ ...deps, poll: () => runPoll(pollerDeps) });
+  const poller = env.SLIPWAY_POLL_ENABLED ? startPoller(pollerDeps) : undefined;
+
+  if (env.SLIPWAY_POLL_TOKEN !== undefined) {
+    logger.info('[slipway] POST /api/poll is enabled for an external scheduler');
+  }
 
   const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
     logger.info(`[slipway] listening on http://localhost:${info.port}`);

@@ -1,0 +1,42 @@
+name: Poll corridors
+
+# Render's free tier sleeps an idle service, so an in-process cron job cannot be
+# relied on: it is asleep exactly when it should fire. This calls the backend
+# instead, which wakes it and runs one polling pass.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: poll-corridors
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger a polling run
+        env:
+          SLIPWAY_API_URL: ${{ vars.SLIPWAY_API_URL }}
+          SLIPWAY_POLL_TOKEN: ${{ secrets.SLIPWAY_POLL_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLIPWAY_API_URL}" ] || [ -z "${SLIPWAY_POLL_TOKEN}" ]; then
+            echo "::notice::Set the SLIPWAY_API_URL repository variable and the SLIPWAY_POLL_TOKEN secret to enable polling."
+            exit 0
+          fi
+          # A sleeping free instance takes about a minute to wake, and a poll
+          # quotes every anchor, so allow a generous timeout and retry the wake.
+          status=$(curl -sS -X POST "${SLIPWAY_API_URL%/}/api/poll" \
+            -H "Authorization: Bearer ${SLIPWAY_POLL_TOKEN}" \
+            --max-time 300 --retry 3 --retry-all-errors --retry-delay 20 \
+            -o response.json -w '%{http_code}')
+          echo "HTTP ${status}"
+          cat response.json || true
+          echo
+          if [ "${status}" != "200" ]; then
+            echo "::error::Polling run failed with HTTP ${status}"
+            exit 1
+          fi

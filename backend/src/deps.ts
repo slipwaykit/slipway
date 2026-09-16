@@ -21,6 +21,22 @@ export interface AppDeps {
   readonly env: Env;
   /** Where to send diagnostics. */
   readonly logger: Logger;
+  /**
+   * Runs one polling pass, when the deployment exposes the trigger endpoint.
+   *
+   * Injected rather than imported so a test can drive the route without a cron
+   * schedule or an attestor.
+   */
+  readonly poll?: () => Promise<PollSummary>;
+}
+
+/** What one polling pass did. Mirrors the poller's summary. */
+export interface PollSummary {
+  readonly corridors: number;
+  readonly snapshots: number;
+  readonly successes: number;
+  readonly attested: number;
+  readonly failed: readonly string[];
 }
 
 export type { ApiErrorBody } from './api-types.js';

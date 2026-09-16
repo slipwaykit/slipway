@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { MockAdapter } from '@slipwaykit/adapter-mock';
+import { loadEnv } from '../src/env.js';
 import { createTestApp, type TestApp } from './harness.js';
 
 let harness: TestApp | undefined;
@@ -8,6 +9,8 @@ afterEach(() => {
   harness?.close();
   harness = undefined;
 });
+
+const SUMMARY = { corridors: 1, snapshots: 3, successes: 2, attested: 0, failed: [] as string[] };
 
 const QUOTES = '/api/quotes?country=NG&fiat=NGN&direction=withdraw&amount=100&method=bank_transfer';
 
@@ -333,5 +336,91 @@ describe('the registry the API is built on', () => {
       .map((adapter) => adapter.id);
 
     expect(ids.some((id) => id.includes('cowrie'))).toBe(false);
+  });
+});
+
+describe('POST /api/poll', () => {
+  const TOKEN = 'a-long-enough-poll-token';
+
+  it('does not exist unless a token is configured', async () => {
+    harness = await createTestApp();
+
+    const response = await harness.app.request('/api/poll', { method: 'POST' });
+
+    expect(response.status).toBe(404);
+    expect((await response.json()).error.code).toBe('NOT_FOUND');
+  });
+
+  it('refuses a missing or wrong token', async () => {
+    harness = await createTestApp({ env: { SLIPWAY_POLL_TOKEN: TOKEN }, poll: async () => SUMMARY });
+
+    const noToken = await harness.app.request('/api/poll', { method: 'POST' });
+    const wrong = await harness.app.request('/api/poll', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer not-the-token-at-all' },
+    });
+
+    expect(noToken.status).toBe(401);
+    expect(wrong.status).toBe(401);
+    expect((await wrong.json()).error.code).toBe('AUTH_INVALID');
+  });
+
+  it('runs one pass and reports what it did', async () => {
+    let runs = 0;
+    harness = await createTestApp({
+      env: { SLIPWAY_POLL_TOKEN: TOKEN },
+      poll: async () => {
+        runs += 1;
+        return SUMMARY;
+      },
+    });
+
+    const response = await harness.app.request('/api/poll', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(runs).toBe(1);
+    expect(body.summary).toEqual(SUMMARY);
+    expect(typeof body.durationMs).toBe('number');
+  });
+
+  it('refuses a second run while one is in progress', async () => {
+    let release: () => void = () => {};
+    const started = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    harness = await createTestApp({
+      env: { SLIPWAY_POLL_TOKEN: TOKEN },
+      poll: async () => {
+        await started;
+        return SUMMARY;
+      },
+    });
+    const headers = { Authorization: `Bearer ${TOKEN}` };
+
+    const first = harness.app.request('/api/poll', { method: 'POST', headers });
+    const second = await harness.app.request('/api/poll', { method: 'POST', headers });
+    release();
+
+    // Overlapping runs would double the load on every anchor and race the
+    // attestor's account sequence numbers.
+    expect(second.status).toBe(429);
+    expect((await second.json()).error.code).toBe('RATE_LIMITED');
+    expect((await first).status).toBe(200);
+  });
+
+  it('is not reachable with GET', async () => {
+    harness = await createTestApp({ env: { SLIPWAY_POLL_TOKEN: TOKEN }, poll: async () => SUMMARY });
+
+    expect((await harness.app.request('/api/poll')).status).toBe(404);
+  });
+
+  it('rejects a token too short to be worth having', () => {
+    expect(() =>
+      loadEnv({ NODE_ENV: 'test', SLIPWAY_POLL_TOKEN: 'short' } as NodeJS.ProcessEnv),
+    ).toThrow(/at least 16 characters/);
   });
 });

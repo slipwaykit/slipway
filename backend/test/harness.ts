@@ -102,6 +102,13 @@ export async function createTestApp(
     readonly adapters?: readonly MockAdapter[];
     readonly env?: Record<string, string>;
     readonly now?: () => number;
+    readonly poll?: () => Promise<{
+      corridors: number;
+      snapshots: number;
+      successes: number;
+      attested: number;
+      failed: string[];
+    }>;
   } = {},
 ): Promise<TestApp> {
   const now = options.now ?? ((): number => 1_757_942_400_000);
@@ -117,7 +124,13 @@ export async function createTestApp(
 
   const registry = new AdapterRegistry(options.adapters ?? testAdapters(now), { now });
   const logger = testLogger();
-  const deps: AppDeps = { db, registry, env, logger };
+  const deps: AppDeps = {
+    db,
+    registry,
+    env,
+    logger,
+    ...(options.poll === undefined ? {} : { poll: options.poll }),
+  };
 
   return { app: createApp(deps), db, registry, env, logger, deps, close };
 }
