@@ -4,13 +4,13 @@ A TypeScript adapter kit that lets Stellar applications add fiat on and off
 ramps without writing a bespoke integration per provider. African corridors
 first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
-> **Status:** core interface, mock and SEP-24 adapters, backend API and poller,
-> an attestations contract on testnet, and a frontend deployed at
-> [slipway-gold.vercel.app](https://slipway-gold.vercel.app). The backend is not
-> deployed yet, so that demo renders but cannot load quotes until
-> `NEXT_PUBLIC_SLIPWAY_API_URL` points at a running API. No live anchor serving
-> NGN, KES, GHS or ZAR advertises SEP-24 as of 2026-09-15, so those corridors run
-> on labelled mock adapters.
+> **Status:** live. The demo is at
+> [slipway-gold.vercel.app](https://slipway-gold.vercel.app), backed by the API on
+> Render and an attestations contract on testnet. The backend runs on a free
+> instance that sleeps after 15 minutes idle, so the first request after a quiet
+> spell takes about a minute. No live anchor serving NGN, KES, GHS or ZAR
+> advertises SEP-24 as of 2026-09-15, so those corridors run on labelled mock
+> adapters.
 
 ## Packages
 
