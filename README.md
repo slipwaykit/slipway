@@ -5,10 +5,12 @@ ramps without writing a bespoke integration per provider. African corridors
 first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 > **Status:** core interface, mock and SEP-24 adapters, backend API and poller,
-> an attestations contract on testnet, and a frontend that builds and runs
-> against them. Not yet deployed. No live anchor serving NGN, KES, GHS or ZAR
-> advertises SEP-24 as of 2026-09-15, so those corridors run on labelled mock
-> adapters.
+> an attestations contract on testnet, and a frontend deployed at
+> [slipway-gold.vercel.app](https://slipway-gold.vercel.app). The backend is not
+> deployed yet, so that demo renders but cannot load quotes until
+> `NEXT_PUBLIC_SLIPWAY_API_URL` points at a running API. No live anchor serving
+> NGN, KES, GHS or ZAR advertises SEP-24 as of 2026-09-15, so those corridors run
+> on labelled mock adapters.
 
 ## Packages
 
@@ -27,7 +29,7 @@ first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 ## Deploying
 
-Backend on Railway, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
+Backend on Render, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
 
 ## Contributing
 
