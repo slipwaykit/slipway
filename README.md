@@ -31,6 +31,10 @@ first: Nigeria (NGN), Kenya (KES), Ghana (GHS), South Africa (ZAR).
 
 Backend on Render, frontend on Vercel. See [DEPLOY.md](DEPLOY.md).
 
+## Country Guides
+
+- [South Africa (ZAR)](docs/countries/south-africa.md) — Currency controls, FSCA crypto regulation, PayShap & RTC payment rails, and Stellar anchor landscape.
+
 ## Contributing
 
 Issues are open. Read [CONTRIBUTING.md](CONTRIBUTING.md) before claiming one.
